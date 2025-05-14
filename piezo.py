@@ -7,9 +7,9 @@ from streamlit_folium import st_folium
 import math
 
 # 파일 경로
-LOCATION_PATH = "location.xlsx"
-TRAFFIC_PATH = "trafficData01.xlsx"
-LIGHT_PATH = "lightData.xlsx"
+LOCATION_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/location.xlsx"
+TRAFFIC_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/trafficData01.xlsx"
+LIGHT_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/lightData.xlsx"
 
 # 데이터 불러오기
 @st.cache_data
