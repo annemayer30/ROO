@@ -87,6 +87,13 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     return time_hr, Ppv, Pload, Pbatt_best, Ebatt_best, Emax, Emin, battery_capacity, multiplier, pcs_required
 
 def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required):
+    # numpy 변환
+    time_hr = np.array(time_hr)
+    Ppv = np.array(Ppv)
+    Pload = np.array(Pload)
+    Pbatt = np.array(Pbatt)
+    Ebatt = np.array(Ebatt)
+
     # 길이 맞추기
     min_len = min(len(time_hr), len(Ppv), len(Pload), len(Pbatt), len(Ebatt))
     time_hr = time_hr[:min_len]
@@ -181,3 +188,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
