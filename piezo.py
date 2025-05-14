@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import st_folium
 import math
+import requests
+from io import BytesIO
+
 
 # 파일 경로
 LOCATION_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/location.xlsx"
@@ -14,11 +17,16 @@ LIGHT_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/lightData.x
 # 데이터 불러오기
 @st.cache_data
 def load_data():
-    location_df = pd.read_excel(LOCATION_PATH)
-    traffic_df = pd.read_excel(TRAFFIC_PATH, header=None)
-    light_df = pd.read_excel(LIGHT_PATH, header=None)
-    return location_df, traffic_df, light_df
+    def load_excel_from_url(url):
+        response = requests.get(url)
+        response.raise_for_status()
+        return pd.read_excel(BytesIO(response.content))
 
+    location_df = load_excel_from_url(LOCATION_PATH)
+    traffic_df = load_excel_from_url(TRAFFIC_PATH)
+    light_df = load_excel_from_url(LIGHT_PATH)
+    return location_df, traffic_df, light_df
+    
 # 발전/배터리 시뮬레이션 함수
 def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min):
     traffic_data = np.array(traffic_data).flatten()
