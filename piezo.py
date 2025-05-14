@@ -121,10 +121,10 @@ def main():
     st.title("서울시 Piezo 기반 교통 발전 지도")
 
     piezo_unit_output = st.number_input("Piezo Output per Tile (Wh)", value=0.00000289, format="%.8f")
-    piezo_count = st.number_input("Number of Piezo Tiles", value=100000, step=1000)
+    piezo_count = st.number_input("Number of Piezo Tiles activated by a Single Wheel", value=100000, step=1000)
     lamp_power = st.number_input("Lamp Power (W)", value=100, step=10)
-    E_ratio_max = st.slider("ESS Max Ratio", 0.5, 1.0, 0.8, 0.01)
-    E_ratio_min = st.slider("ESS Min Ratio", 0.0, 0.5, 0.2, 0.01)
+    E_ratio_max = st.slider("SoC Max Ratio", 0.5, 1.0, 0.8, 0.01)
+    E_ratio_min = st.slider("SoC Min Ratio", 0.0, 0.5, 0.2, 0.01)
 
     location_df, traffic_df, light_df = load_data()
     address_list = traffic_df.iloc[0].tolist()
@@ -158,7 +158,7 @@ def main():
         time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required = simulate_piezo(
             traffic_series, light_series, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min
         )
-        st.subheader(f"에너지 흐름 시각화: {clicked_addr}")
+        st.subheader(f"ESS 최적화 그래프: {clicked_addr}")
         plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required)
 
 if __name__ == "__main__":
