@@ -9,21 +9,25 @@ import math
 # 파일 경로
 LOCATION_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/location.xlsx"
 TRAFFIC_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/trafficData01.xlsx"
+LIGHT_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/lightData.xlsx"
 
 # 데이터 불러오기
 @st.cache_data
 def load_data():
     location_df = pd.read_excel(LOCATION_PATH)
     traffic_df = pd.read_excel(TRAFFIC_PATH, header=None)
-    return location_df, traffic_df
+    light_df = pd.read_excel(LIGHT_PATH, header=None)
+    return location_df, traffic_df, light_df
 
 # 발전/배터리 시뮬레이션 함수
-def simulate_piezo(traffic_data, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min):
+def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min):
     traffic_data = np.array(traffic_data).flatten()
-    traffic_data = np.roll(traffic_data, -420)  # 07시 기준 정렬
-    Ppv = traffic_data * piezo_unit_output * piezo_count * 4  # Wh/min
+    traffic_data = np.roll(traffic_data, -420)
+    light_data = np.array(light_data).flatten()
+    light_data = np.roll(light_data, -420)
 
-    raw_load = np.ones_like(Ppv) * lamp_power  # 단일 가로등 부하 가정
+    Ppv = traffic_data * piezo_unit_output * piezo_count * 4  # Wh/min
+    raw_load = light_data * lamp_power  # Wh/min
     total_piezo = np.sum(Ppv)
     total_raw_load = np.sum(raw_load)
     multiplier = max(int(total_piezo // total_raw_load), 1)
@@ -119,9 +123,10 @@ def main():
     E_ratio_max = st.slider("ESS Max Ratio", min_value=0.5, max_value=1.0, value=0.8, step=0.01)
     E_ratio_min = st.slider("ESS Min Ratio", min_value=0.0, max_value=0.5, value=0.2, step=0.01)
 
-    location_df, traffic_df = load_data()
+    location_df, traffic_df, light_df = load_data()
     address_list = traffic_df.iloc[0].tolist()
     traffic_values = traffic_df.iloc[1:].T.values
+    light_values = light_df.values.flatten()
 
     m = folium.Map(location=[37.55, 126.98], zoom_start=11)
 
@@ -148,7 +153,7 @@ def main():
         traffic_series = traffic_values[traffic_idx]
 
         time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required = simulate_piezo(
-            traffic_series, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min
+            traffic_series, light_values, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min
         )
         st.subheader(f"에너지 흐름 시각화: {clicked_addr}")
         plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required)
