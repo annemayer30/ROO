@@ -118,7 +118,7 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     st.pyplot(fig)
 
 def main():
-    st.title("서울시 Piezo 기반 교통 발전 지도")
+    st.title("서울시 압전 발전 ESS 구성 정보")
 
     piezo_unit_output = st.number_input("Piezo Output per Tile (Wh)", value=0.00000289, format="%.8f")
     piezo_count = st.number_input("Number of Piezo Tiles activated by a Single Wheel", value=100000, step=1000)
