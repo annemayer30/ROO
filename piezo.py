@@ -113,8 +113,8 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     ax2.set_ylim([0, battery_capacity])
     ax2.set_ylabel("Battery Energy [Wh]")
 
-    fig.legend(loc='upper left', bbox_to_anchor=(0.00, 0.99))
-    fig.text(0.02, 0.75, f"Streetlamps: {multiplier}\nBattery: {battery_capacity:.0f} Wh\nPCS: {pcs_required} W", fontsize=10, bbox=dict(facecolor='white', edgecolor='gray'))
+    fig.legend(loc='upper left', bbox_to_anchor=(-0.1, 0.85))
+    fig.text(0.02, 0.45, f"Streetlamps: {multiplier}\nBattery: {battery_capacity:.0f} Wh\nPCS: {pcs_required} W", fontsize=10, bbox=dict(facecolor='white', edgecolor='gray'))
     st.pyplot(fig)
 
 def main():
