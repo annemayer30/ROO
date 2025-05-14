@@ -11,7 +11,6 @@ LOCATION_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/location
 TRAFFIC_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/trafficData01.xlsx"
 LIGHT_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/lightData.xlsx"
 
-# 데이터 불러오기
 @st.cache_data
 def load_data():
     location_df = pd.read_excel(LOCATION_PATH)
@@ -19,7 +18,6 @@ def load_data():
     light_df = pd.read_excel(LIGHT_PATH, header=None)
     return location_df, traffic_df, light_df
 
-# 발전/배터리 시뮬레이션 함수
 def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min):
     traffic_data = np.array(traffic_data).flatten()
     traffic_data = np.roll(traffic_data, -420)
@@ -88,11 +86,9 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
 
     return time_hr, Ppv, Pload, Pbatt_best, Ebatt_best, Emax, Emin, battery_capacity, multiplier, pcs_required
 
-# 그래프 출력 함수
 def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required):
     fig, ax1 = plt.subplots(figsize=(12, 5))
     fig.subplots_adjust(left=0.22, right=0.95)
-
     Pload_actual = Ppv + np.where(Pbatt > 0, Pbatt, 0)
 
     ax1.plot(time_hr, Ppv, label='Piezo [Wh/min]', color='orange')
@@ -116,7 +112,6 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     fig.text(0.02, 0.82, info_text, fontsize=10, bbox=dict(facecolor='white', edgecolor='gray'))
     st.pyplot(fig)
 
-# 메인 실행
 def main():
     st.title("서울시 Piezo 기반 교통 발전 지도")
 
@@ -129,7 +124,7 @@ def main():
     location_df, traffic_df, light_df = load_data()
     address_list = traffic_df.iloc[0].tolist()
     traffic_values = traffic_df.iloc[1:].T.values
-    light_values = light_df.values  # ✅ T 제거, (지점 수, 1440)
+    light_values = light_df.values  # (지점 수, 1440)
 
     m = folium.Map(location=[37.55, 126.98], zoom_start=11)
 
@@ -139,6 +134,10 @@ def main():
             traffic_idx = address_list.index(addr)
             traffic_series = traffic_values[traffic_idx].flatten()
             light_series = light_values[traffic_idx].flatten()
+
+            min_len = min(len(traffic_series), len(light_series), 1440)
+            traffic_series = traffic_series[:min_len]
+            light_series = light_series[:min_len]
 
             iframe = folium.IFrame(f"<b>{addr}</b><br>Click to see graph in app")
             popup = folium.Popup(iframe, min_width=200, max_width=300)
@@ -156,6 +155,10 @@ def main():
         traffic_idx = address_list.index(clicked_addr)
         traffic_series = traffic_values[traffic_idx].flatten()
         light_series = light_values[traffic_idx].flatten()
+
+        min_len = min(len(traffic_series), len(light_series), 1440)
+        traffic_series = traffic_series[:min_len]
+        light_series = light_series[:min_len]
 
         time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required = simulate_piezo(
             traffic_series, light_series, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min
