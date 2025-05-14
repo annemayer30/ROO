@@ -87,7 +87,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     return time_hr, Ppv, Pload, Pbatt_best, Ebatt_best, Emax, Emin, battery_capacity, multiplier, pcs_required
 
 def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required):
-    # 배열 길이 일치 및 유효값 필터링
+    # 길이 맞추기
     min_len = min(len(time_hr), len(Ppv), len(Pload), len(Pbatt), len(Ebatt))
     time_hr = time_hr[:min_len]
     Ppv = Ppv[:min_len]
@@ -95,7 +95,8 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     Pbatt = Pbatt[:min_len]
     Ebatt = Ebatt[:min_len]
 
-    mask = np.isfinite(Ppv) & np.isfinite(Pload) & np.isfinite(Pbatt) & np.isfinite(Ebatt)
+    # 유효값 마스킹
+    mask = np.isfinite(time_hr) & np.isfinite(Ppv) & np.isfinite(Pload) & np.isfinite(Pbatt) & np.isfinite(Ebatt)
     time_hr = time_hr[mask]
     Ppv = Ppv[mask]
     Pload = Pload[mask]
@@ -124,7 +125,7 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     ax2.set_ylabel("Battery Energy [Wh]")
 
     fig.legend(loc='upper left', bbox_to_anchor=(0.02, 0.92))
-    info_text = f"Streetlamps: {multiplier}\\nBattery: {battery_capacity:.0f} Wh\\nPCS: {pcs_required} W"
+    info_text = f"Streetlamps: {multiplier}\nBattery: {battery_capacity:.0f} Wh\nPCS: {pcs_required} W"
     fig.text(0.02, 0.82, info_text, fontsize=10, bbox=dict(facecolor='white', edgecolor='gray'))
     st.pyplot(fig)
 
@@ -140,7 +141,7 @@ def main():
     location_df, traffic_df, light_df = load_data()
     address_list = traffic_df.iloc[0].tolist()
     traffic_values = traffic_df.iloc[1:].T.values
-    light_values = light_df.values  # shape: (지점 수, 1440)
+    light_values = light_df.values
 
     m = folium.Map(location=[37.55, 126.98], zoom_start=11)
 
@@ -150,7 +151,6 @@ def main():
             traffic_idx = address_list.index(addr)
             traffic_series = traffic_values[traffic_idx].flatten()
             light_series = light_values[traffic_idx].flatten()
-
             traffic_series = traffic_series[:1440]
             light_series = light_series[:1440]
 
@@ -170,7 +170,6 @@ def main():
         traffic_idx = address_list.index(clicked_addr)
         traffic_series = traffic_values[traffic_idx].flatten()
         light_series = light_values[traffic_idx].flatten()
-
         traffic_series = traffic_series[:1440]
         light_series = light_series[:1440]
 
