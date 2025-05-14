@@ -87,9 +87,25 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     return time_hr, Ppv, Pload, Pbatt_best, Ebatt_best, Emax, Emin, battery_capacity, multiplier, pcs_required
 
 def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required):
+    # 배열 길이 일치 및 유효값 필터링
+    min_len = min(len(time_hr), len(Ppv), len(Pload), len(Pbatt), len(Ebatt))
+    time_hr = time_hr[:min_len]
+    Ppv = Ppv[:min_len]
+    Pload = Pload[:min_len]
+    Pbatt = Pbatt[:min_len]
+    Ebatt = Ebatt[:min_len]
+
+    mask = np.isfinite(Ppv) & np.isfinite(Pload) & np.isfinite(Pbatt) & np.isfinite(Ebatt)
+    time_hr = time_hr[mask]
+    Ppv = Ppv[mask]
+    Pload = Pload[mask]
+    Pbatt = Pbatt[mask]
+    Ebatt = Ebatt[mask]
+
+    Pload_actual = Ppv + np.where(Pbatt > 0, Pbatt, 0)
+
     fig, ax1 = plt.subplots(figsize=(12, 5))
     fig.subplots_adjust(left=0.22, right=0.95)
-    Pload_actual = Ppv + np.where(Pbatt > 0, Pbatt, 0)
 
     ax1.plot(time_hr, Ppv, label='Piezo [Wh/min]', color='orange')
     ax1.plot(time_hr, Pload, label='Load [Wh/min]', color='blue')
@@ -124,7 +140,7 @@ def main():
     location_df, traffic_df, light_df = load_data()
     address_list = traffic_df.iloc[0].tolist()
     traffic_values = traffic_df.iloc[1:].T.values
-    light_values = light_df.values  # (지점 수, 1440)
+    light_values = light_df.values  # shape: (지점 수, 1440)
 
     m = folium.Map(location=[37.55, 126.98], zoom_start=11)
 
@@ -135,9 +151,8 @@ def main():
             traffic_series = traffic_values[traffic_idx].flatten()
             light_series = light_values[traffic_idx].flatten()
 
-            min_len = min(len(traffic_series), len(light_series), 1440)
-            traffic_series = traffic_series[:min_len]
-            light_series = light_series[:min_len]
+            traffic_series = traffic_series[:1440]
+            light_series = light_series[:1440]
 
             iframe = folium.IFrame(f"<b>{addr}</b><br>Click to see graph in app")
             popup = folium.Popup(iframe, min_width=200, max_width=300)
@@ -156,9 +171,8 @@ def main():
         traffic_series = traffic_values[traffic_idx].flatten()
         light_series = light_values[traffic_idx].flatten()
 
-        min_len = min(len(traffic_series), len(light_series), 1440)
-        traffic_series = traffic_series[:min_len]
-        light_series = light_series[:min_len]
+        traffic_series = traffic_series[:1440]
+        light_series = light_series[:1440]
 
         time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required = simulate_piezo(
             traffic_series, light_series, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min
