@@ -87,12 +87,35 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     return time_hr, Ppv, Pload, Pbatt_best, Ebatt_best, Emax, Emin, battery_capacity, multiplier, pcs_required
 
 def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required):
-    # numpy 변환
-    time_hr = np.array(time_hr)
-    Ppv = np.array(Ppv)
-    Pload = np.array(Pload)
-    Pbatt = np.array(Pbatt)
-    Ebatt = np.array(Ebatt)
+    # numpy 배열로 강제 변환
+    time_hr = np.asarray(time_hr, dtype=np.float64)
+    Ppv = np.asarray(Ppv, dtype=np.float64)
+    Pload = np.asarray(Pload, dtype=np.float64)
+    Pbatt = np.asarray(Pbatt, dtype=np.float64)
+    Ebatt = np.asarray(Ebatt, dtype=np.float64)
+
+    # 길이 통일
+    min_len = min(len(time_hr), len(Ppv), len(Pload), len(Pbatt), len(Ebatt))
+    time_hr = time_hr[:min_len]
+    Ppv = Ppv[:min_len]
+    Pload = Pload[:min_len]
+    Pbatt = Pbatt[:min_len]
+    Ebatt = Ebatt[:min_len]
+
+    # 유효값 필터링
+    mask = (
+        np.isfinite(time_hr) &
+        np.isfinite(Ppv) &
+        np.isfinite(Pload) &
+        np.isfinite(Pbatt) &
+        np.isfinite(Ebatt)
+    )
+    time_hr = time_hr[mask]
+    Ppv = Ppv[mask]
+    Pload = Pload[mask]
+    Pbatt = Pbatt[mask]
+    Ebatt = Ebatt[mask]
+
 
     # 길이 맞추기
     min_len = min(len(time_hr), len(Ppv), len(Pload), len(Pbatt), len(Ebatt))
