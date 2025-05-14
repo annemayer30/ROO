@@ -7,9 +7,9 @@ from streamlit_folium import st_folium
 import math
 
 # 파일 경로
-LOCATION_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/location.xlsx"
-TRAFFIC_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/trafficData01.xlsx"
-LIGHT_PATH = "https://raw.githubusercontent.com/annemayer30/ROO/main/lightData.xlsx"
+LOCATION_PATH = "location.xlsx"
+TRAFFIC_PATH = "trafficData01.xlsx"
+LIGHT_PATH = "lightData.xlsx"
 
 # 데이터 불러오기
 @st.cache_data
@@ -26,8 +26,8 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     light_data = np.array(light_data).flatten()
     light_data = np.roll(light_data, -420)
 
-    Ppv = traffic_data * piezo_unit_output * piezo_count * 4  # Wh/min
-    raw_load = light_data * lamp_power  # Wh/min
+    Ppv = traffic_data * piezo_unit_output * piezo_count * 4
+    raw_load = light_data * lamp_power
     total_piezo = np.sum(Ppv)
     total_raw_load = np.sum(raw_load)
     if not np.isfinite(total_raw_load) or total_raw_load == 0:
@@ -112,7 +112,7 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     ax2.set_ylabel("Battery Energy [Wh]")
 
     fig.legend(loc='upper left', bbox_to_anchor=(0.02, 0.92))
-    info_text = f"Streetlamps: {multiplier}\nBattery: {battery_capacity:.0f} Wh\nPCS: {pcs_required} W"
+    info_text = f"Streetlamps: {multiplier}\\nBattery: {battery_capacity:.0f} Wh\\nPCS: {pcs_required} W"
     fig.text(0.02, 0.82, info_text, fontsize=10, bbox=dict(facecolor='white', edgecolor='gray'))
     st.pyplot(fig)
 
@@ -129,7 +129,7 @@ def main():
     location_df, traffic_df, light_df = load_data()
     address_list = traffic_df.iloc[0].tolist()
     traffic_values = traffic_df.iloc[1:].T.values
-    light_values = light_df.T.values  # 수정: light는 1행부터 실제 값
+    light_values = light_df.values  # ✅ T 제거, (지점 수, 1440)
 
     m = folium.Map(location=[37.55, 126.98], zoom_start=11)
 
@@ -137,7 +137,8 @@ def main():
         addr = row['지점 위치']
         if addr in address_list:
             traffic_idx = address_list.index(addr)
-            traffic_series = traffic_values[traffic_idx]
+            traffic_series = traffic_values[traffic_idx].flatten()
+            light_series = light_values[traffic_idx].flatten()
 
             iframe = folium.IFrame(f"<b>{addr}</b><br>Click to see graph in app")
             popup = folium.Popup(iframe, min_width=200, max_width=300)
@@ -153,8 +154,8 @@ def main():
     if st_data and st_data['last_object_clicked_tooltip']:
         clicked_addr = st_data['last_object_clicked_tooltip']
         traffic_idx = address_list.index(clicked_addr)
-        traffic_series = traffic_values[traffic_idx]
-        light_series = light_values[traffic_idx]  # 해당 지점의 부하 데이터 사용
+        traffic_series = traffic_values[traffic_idx].flatten()
+        light_series = light_values[traffic_idx].flatten()
 
         time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capacity, multiplier, pcs_required = simulate_piezo(
             traffic_series, light_series, piezo_unit_output, piezo_count, lamp_power, E_ratio_max, E_ratio_min
