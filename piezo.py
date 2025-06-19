@@ -41,7 +41,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     battery_capacity = energy_range / (E_ratio_max - E_ratio_min) if (E_ratio_max - E_ratio_min) != 0 else 1
     Emin = battery_capacity * E_ratio_min
     Emax = battery_capacity * E_ratio_max
-    pcs_required = math.ceil(np.max(np.abs(temp_flow)) / 60)
+    pcs_required = math.ceil(np.max(np.abs(temp_flow)))
 
     Pbatt_best, Ebatt_best, max_supplied = None, None, -np.inf
     for E_init in np.linspace(Emin, Emax, 100):
@@ -97,12 +97,12 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     fig.subplots_adjust(left=0.22, right=0.95)
 
     Pload_actual = Ppv + np.where(Pbatt > 0, Pbatt, 0)
-    ax1.plot(time_hr, Ppv, label='Piezo [Wh/min]', color='orange')
-    ax1.plot(time_hr, Pload, label='Load [Wh/min]', color='blue')
+    ax1.plot(time_hr, Ppv, label='Piezo [Wh]', color='orange')
+    ax1.plot(time_hr, Pload, label='Load [Wh]', color='blue')
     ax1.fill_between(time_hr, Ppv, Pload_actual, where=Pbatt > 0, interpolate=True, color='red', alpha=0.3, label='Battery Discharge')
     ax1.fill_between(time_hr, 0, Pbatt, where=Pbatt < 0, interpolate=True, color='green', alpha=0.3, label='Battery Charge')
     ax1.set_xlabel("Time [hr]")
-    ax1.set_ylabel("Energy Flow [Wh/min]")
+    ax1.set_ylabel("Energy Flow [Wh]")
     ax1.set_xlim([0, 24])
     ax1.grid(True)
 
