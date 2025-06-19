@@ -41,7 +41,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     battery_capacity = energy_range / (E_ratio_max - E_ratio_min) if (E_ratio_max - E_ratio_min) != 0 else 1
     Emin = battery_capacity * E_ratio_min
     Emax = battery_capacity * E_ratio_max
-    pcs_required = math.ceil(np.max(np.abs(temp_flow)))
+    pcs_required = math.ceil(np.max(np.abs(temp_flow)) / 60)
 
     Pbatt_best, Ebatt_best, max_supplied = None, None, -np.inf
     for E_init in np.linspace(Emin, Emax, 100):
@@ -97,12 +97,12 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     fig.subplots_adjust(left=0.22, right=0.95)
 
     Pload_actual = Ppv + np.where(Pbatt > 0, Pbatt, 0)
-    ax1.plot(time_hr, Ppv, label='Piezo [Wh]', color='orange')
-    ax1.plot(time_hr, Pload, label='Load [Wh]', color='blue')
+    ax1.plot(time_hr, Ppv, label='Piezo [Wh/min]', color='orange')
+    ax1.plot(time_hr, Pload, label='Load [Wh/min]', color='blue')
     ax1.fill_between(time_hr, Ppv, Pload_actual, where=Pbatt > 0, interpolate=True, color='red', alpha=0.3, label='Battery Discharge')
     ax1.fill_between(time_hr, 0, Pbatt, where=Pbatt < 0, interpolate=True, color='green', alpha=0.3, label='Battery Charge')
     ax1.set_xlabel("Time [hr]")
-    ax1.set_ylabel("Energy Flow [Wh]")
+    ax1.set_ylabel("Energy Flow [Wh/min]")
     ax1.set_xlim([0, 24])
     ax1.grid(True)
 
@@ -120,8 +120,8 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
 def main():
     st.title("서울시 압전 발전 ESS 구성 정보")
 
-    piezo_unit_output = st.number_input("Piezo Output per Tile (Wh)", value=0.000289, format="%.8f")
-    piezo_count = st.number_input("Number of Piezo Tiles activated by a Single Wheel", value=10000, step=1000)
+    piezo_unit_output = st.number_input("Piezo Output per Tile (Wh)", value=0.00000289, format="%.8f")
+    piezo_count = st.number_input("Number of Piezo Tiles activated by a Single Wheel", value=100000, step=1000)
     lamp_power = st.number_input("Lamp Power (W)", value=100, step=10)
     E_ratio_max = st.slider("SoC Max Ratio", 0.5, 1.0, 0.8, 0.01)
     E_ratio_min = st.slider("SoC Min Ratio", 0.0, 0.5, 0.2, 0.01)
@@ -163,4 +163,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
