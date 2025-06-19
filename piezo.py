@@ -120,7 +120,7 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
 def main():
     st.title("서울시 압전 발전 ESS 구성 정보")
 
-    piezo_unit_output = st.number_input("Piezo Output per Tile (Wh)", value=0.620, format="%.8f")
+    piezo_unit_output = st.number_input("Piezo Output per Tile (W)", value=0.620, format="%.8f")
     piezo_count = st.number_input("Number of Piezo Tiles activated by a Single Wheel", value=1000, step=1000)
     lamp_power = st.number_input("Lamp Power (W)", value=100, step=10)
     E_ratio_max = st.slider("SoC Max Ratio", 0.5, 1.0, 0.8, 0.01)
