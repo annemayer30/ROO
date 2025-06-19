@@ -75,7 +75,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count,
 # --------------------------------------------------
 
 def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt,
-                     Emax, Emin, battery_capacity):
+                     Emax, Emin, battery_capacity, multiplier):
     fig, ax1 = plt.subplots(figsize=(12,5))
     fig.subplots_adjust(left=0.22, right=0.95)
 
@@ -92,7 +92,7 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt,
     ax1.set_ylabel('Energy Flow [Wh/min]')
     ax1.set_xlim(0,24)
     ax1.grid(True)
-    ax1.set_yticklabels([])                 # ← y축 숫자 숨김
+    ax1.set_yticklabels([])
 
     ax2 = ax1.twinx()
     ax2.plot(time_hr, Ebatt, color='purple', label='Battery Energy [Wh]')
@@ -100,9 +100,11 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt,
     ax2.axhline(Emin, color='purple', linestyle=':')
     ax2.set_ylim(0, battery_capacity)
     ax2.set_ylabel('Battery Energy [Wh]')
-    ax2.set_yticklabels([])                 # ← y축 숫자 숨김
+    ax2.set_yticklabels([])
 
     fig.legend(loc='upper left', bbox_to_anchor=(-0.01,0.85))
+    fig.text(0.02, 0.45, f"Streetlamps: {multiplier}", fontsize=10,
+             bbox=dict(facecolor='white', edgecolor='gray'))
     st.pyplot(fig)
 
 # --------------------------------------------------
@@ -147,7 +149,7 @@ def main():
 
         st.subheader(f'ESS 최적화 그래프: {addr}')
         plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt,
-                         Emax, Emin, battery_cap)
+                         Emax, Emin, battery_cap, mult)
 
 if __name__ == '__main__':
     main()
