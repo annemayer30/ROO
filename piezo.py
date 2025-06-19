@@ -25,8 +25,8 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     traffic_data = np.roll(traffic_data, -420)
     light_data = np.roll(light_data, -420)
 
-    Ppv = traffic_data * piezo_unit_output * piezo_count * 4 / 60
-    raw_load = light_data * lamp_power / 60
+    Ppv = traffic_data * piezo_unit_output * piezo_count * 4
+    raw_load = light_data * lamp_power
     total_piezo = np.sum(Ppv)
     total_raw_load = np.sum(raw_load)
     multiplier = max(int(total_piezo // total_raw_load), 1) if total_raw_load > 0 else 1
@@ -97,12 +97,12 @@ def plot_energy_flow(time_hr, Ppv, Pload, Pbatt, Ebatt, Emax, Emin, battery_capa
     fig.subplots_adjust(left=0.22, right=0.95)
 
     Pload_actual = Ppv + np.where(Pbatt > 0, Pbatt, 0)
-    ax1.plot(time_hr, Ppv, label='Piezo [Wh/min]', color='orange')
-    ax1.plot(time_hr, Pload, label='Load [Wh/min]', color='blue')
+    ax1.plot(time_hr, Ppv, label='Piezo [Wh]', color='orange')
+    ax1.plot(time_hr, Pload, label='Load [Wh]', color='blue')
     ax1.fill_between(time_hr, Ppv, Pload_actual, where=Pbatt > 0, interpolate=True, color='red', alpha=0.3, label='Battery Discharge')
     ax1.fill_between(time_hr, 0, Pbatt, where=Pbatt < 0, interpolate=True, color='green', alpha=0.3, label='Battery Charge')
     ax1.set_xlabel("Time [hr]")
-    ax1.set_ylabel("Energy Flow [Wh/min]")
+    ax1.set_ylabel("Energy Flow [Wh]")
     ax1.set_xlim([0, 24])
     ax1.grid(True)
 
