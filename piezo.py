@@ -38,7 +38,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     temp_flow = Pload - Ppv
     Ebatt_temp = np.cumsum(temp_flow) - np.cumsum(temp_flow)[0]
     energy_range = np.max(Ebatt_temp) - np.min(Ebatt_temp)
-    battery_capacity = (energy_range / (E_ratio_max - E_ratio_min))/60 if (E_ratio_max - E_ratio_min) != 0 else 1
+    battery_capacity = energy_range / (E_ratio_max - E_ratio_min) if (E_ratio_max - E_ratio_min) != 0 else 1
     Emin = battery_capacity * E_ratio_min
     Emax = battery_capacity * E_ratio_max
     pcs_required = math.ceil(np.max(np.abs(temp_flow)))
