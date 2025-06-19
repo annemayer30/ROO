@@ -26,11 +26,11 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     light_data = np.roll(light_data, -420)
 
     Ppv = traffic_data * piezo_unit_output * piezo_count * 4
-    raw_load = light_data * lamp_power
+    raw_load = 60*light_data * lamp_power
     total_piezo = np.sum(Ppv)
     total_raw_load = np.sum(raw_load)
     multiplier = max(int(total_piezo // total_raw_load), 1) if total_raw_load > 0 else 1
-    Pload = 60*raw_load * multiplier
+    Pload = raw_load * multiplier
 
     N = len(Pload)
     time_hr = np.arange(N) / 60
