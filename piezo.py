@@ -25,8 +25,8 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     traffic_data = np.roll(traffic_data, -420)
     light_data = np.roll(light_data, -420)
 
-    Ppv = traffic_data * piezo_unit_output * piezo_count * 4
-    raw_load = 60 * light_data * lamp_power
+    Ppv = traffic_data * piezo_unit_output * piezo_count * 4 / 60
+    raw_load = light_data * lamp_power / 60
     total_piezo = np.sum(Ppv)
     total_raw_load = np.sum(raw_load)
     multiplier = max(int(total_piezo // total_raw_load), 1) if total_raw_load > 0 else 1
@@ -41,7 +41,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     battery_capacity = energy_range / (E_ratio_max - E_ratio_min) if (E_ratio_max - E_ratio_min) != 0 else 1
     Emin = battery_capacity * E_ratio_min
     Emax = battery_capacity * E_ratio_max
-    pcs_required = math.ceil(np.max(np.abs(temp_flow)))
+    pcs_required = math.ceil(np.max(np.abs(temp_flow))*60)
 
     Pbatt_best, Ebatt_best, max_supplied = None, None, -np.inf
     for E_init in np.linspace(Emin, Emax, 100):
