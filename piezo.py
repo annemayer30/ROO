@@ -29,7 +29,7 @@ def simulate_piezo(traffic_data, light_data, piezo_unit_output, piezo_count, lam
     raw_load = light_data * lamp_power
     total_piezo = np.sum(Ppv)
     total_raw_load = np.sum(raw_load)
-    multiplier = (max(int(total_piezo // total_raw_load), 1))/20 if total_raw_load > 0 else 1
+    multiplier = (max(int(total_piezo // total_raw_load), 1))/5 if total_raw_load > 0 else 1
     Pload = raw_load * multiplier
 
     N = len(Pload)
